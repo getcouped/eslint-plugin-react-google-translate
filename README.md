@@ -31,7 +31,7 @@ Then configure the rule under the rules section.
 ```json
 {
   "rules": {
-    "react-google-translate/no-conditional-text-nodes": "error"
+    "react-google-translate/no-conditional-text-nodes-with-siblings": "error"
   }
 }
 ```

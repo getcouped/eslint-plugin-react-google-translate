@@ -38,7 +38,7 @@ Then configure the rule under the rules section.
 
 ## Rule
 
-When active on a page, the Google Translate browser extension is very liberal with its DOM manipulation, notably, replacing text nodes with `font` tags. This can be a problem for React applications as it can cause an exception to be thrown when _conditionally_ rendering text nodes within JSX expressions.
+When active on a page, the Google Translate browser extension is very liberal with its DOM manipulation, notably, replacing text nodes with `font` tags. This can be a problem for React applications as it can cause an exception to be thrown when _conditionally_ rendering text nodes with siblings within JSX expressions.
 
 (n.b. This is a known issue to both [React](https://github.com/facebook/react/issues/11538#issuecomment-390386520) and [Google](https://issues.chromium.org/issues/41407169).)
 
@@ -50,25 +50,34 @@ Example of code that will throw:
 function SomeComponent({ val }) {
   return (
     <div>
-      <p>{val ? 'foo' : 'bar'}</p> // text nodes are conditionally rendered
-      <p>{val && 'foo'}</p> // text node is conditionally rendered
-      <p>{val || 'bar'}</p> // text node is conditionally rendered
-      <p>Hello world!</p>
+      <p>{val ? 'foo' : 'bar'} hello world</p> // ❌ all text must be wrapped
+      <p>
+        {val ? 'foo' : 'bar'} <span>hello</span> // ❌ foo & bar must be wrapped
+      </p>
+      <p>
+        {val && 'foo'} // ❌ 'foo' needs to be wrapped in a `span`
+        <span>hello world</span>
+      </p>
+      <p>{val || 'bar'}</p> // ✅ conditionally rendered text, but no siblings
     </div>
   );
 }
 ```
 
-The correct way to write this code, avoiding browser exceptions is to wrap each of the conditionally rendered text nodes in an element (generally a `<span>`):
+The correct way to write this code, avoiding browser exceptions is to wrap each of the conditionally rendered text nodes (with siblings) in an element (generally a `<span>`):
 
 ```jsx
 function SomeComponent({ val }) {
   return (
     <div>
-      <p>{val ? <span>foo</span> : <span>bar</span>}</p> // no exception thrown
-      <p>{val && <span>foo</span>}</p> // no exception thrown
-      <p>{val || <span>bar</span>}</p> // no exception thrown
-      <p>Hello world!</p>
+      <p>
+        {val ? <span>foo</span> : <span>bar</span>} <span>hello world</span>
+      </p>
+      <p>
+        {val && <span>foo</span>}
+        <span>hello world</span>
+      </p>
+      <p>{val || 'bar'}</p> // ✅ still no need to wrap, due to no siblings
     </div>
   );
 }

@@ -109,7 +109,7 @@ function SomeComponent({ val }) {
         <span>hello world</span>
       </p>
       <p>
-        // ✅ object properties rendering a text node sohuld be wrapped
+        // ✅ object properties rendering a text node should be wrapped
         {val ? <span>{obj.a}</span> : <span>bar</span>} <span>hello</span>
       </p>
       <p>

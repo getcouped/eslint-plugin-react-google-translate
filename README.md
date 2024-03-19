@@ -52,9 +52,9 @@ When active on a page, the Google Translate browser extension is very liberal wi
 
 (n.b. This is a known issue to both [React](https://github.com/facebook/react/issues/11538#issuecomment-390386520) and [Google](https://issues.chromium.org/issues/41407169).)
 
-Whilst many proposals have been suggested to avoid browser issues, this ESLint plugin aims to solve the problem far earlier in the development process by highlighting certain code patterns to the developer which will cause a browser exception to be thrown where Google Translate is in use.
+Whilst many proposals have been suggested to avoid browser issues, this ESLint plugin aims to solve the problem far earlier in the development process by highlighting certain code patterns to the developer which can cause a browser exception to be thrown where Google Translate is in use.
 
-Example of code that will throw:
+Examples of code that will throw:
 
 ```jsx
 function SomeComponent({ val }) {
@@ -75,7 +75,7 @@ function SomeComponent({ val }) {
         {val ? val.toLocaleString() : <span>bar</span>} <span>hello world</span>
       </p>
       <p>
-        // ❌ object properties rendering a text node sohuld be wrapped
+        // ❌ object properties rendering a text node should be wrapped
         {val ? obj.a : <span>bar</span>} <span>hello</span>
       </p>
       <p>
@@ -83,9 +83,9 @@ function SomeComponent({ val }) {
         {val && 'foo'}
         <span>hello world</span>
       </p>
-      // ✅ conditionally rendered text nodes, with no siblings, won't throw
+      // ✅ conditionally rendered text nodes with no siblings won't throw
       <p>{val || 'bar'}</p>
-      // ✅ conditionally rendered text nodes, with no siblings, won't throw
+      // ✅ conditionally rendered text nodes with no siblings won't throw
       <p>{val ? 'foo' : 'bar'}</p>
     </div>
   );
@@ -98,13 +98,15 @@ The correct way to write this code, avoiding browser exceptions is to wrap each 
 function SomeComponent({ val }) {
   return (
     <div>
-      // ✅ all text nodes with siblings, where one is conditional, wrapped
+      // ✅ all text nodes are wrapped
       <p>
-        {val ? <span>foo</span> : <span>bar</span>} <span>hello world</span>
+        {val ? <span>foo</span> : <span>bar</span>}
+        <span>hello world</span>
       </p>
       <p>
         // ✅ `val.toLocaleString()` returns a text node and should be wrapped
-        {val ? <span>{val.toLocaleString()}</span> : <span>bar</span>} <span>hello world</span>
+        {val ? <span>{val.toLocaleString()}</span> : <span>bar</span>}
+        <span>hello world</span>
       </p>
       <p>
         // ✅ object properties rendering a text node sohuld be wrapped
@@ -112,8 +114,7 @@ function SomeComponent({ val }) {
       </p>
       <p>
         // ✅ 'foo' needs to be wrapped in a span (expression has a sibling)
-        {val && <span>foo</span>}
-        <span>hello world</span>
+        {val && <span>foo</span>} <span>hello world</span>
       </p>
       // ✅ conditionally rendered text, but no siblings
       <p>{val || 'bar'}</p>

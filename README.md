@@ -50,15 +50,33 @@ Example of code that will throw:
 function SomeComponent({ val }) {
   return (
     <div>
-      <p>{val ? 'foo' : 'bar'} hello world</p> // ❌ all text must be wrapped
+      // ❌ all text must be wrapped in spans ('foo', 'bar' & 'hello world')
+      <p>{val ? 'foo' : 'bar'} hello world</p>
       <p>
-        {val ? 'foo' : 'bar'} <span>hello</span> // ❌ foo & bar must be wrapped
+        // ❌ foo & bar must be wrapped
+        {val ? 'foo' : 'bar'} <span>hello world</span>
       </p>
       <p>
-        {val && 'foo'} // ❌ 'foo' needs to be wrapped in a `span`
+        // ❌ 'hello world' must be wrapped
+        {val ? <span>foo</span> : <span>bar</span>} hello world
+      </p>
+      <p>
+        // ❌ `val.toLocaleString()` returns a text node and should be wrapped
+        {val ? val.toLocaleString() : <span>bar</span>} <span>hello world</span>
+      </p>
+      <p>
+        // ❌ object properties rendering a text node sohuld be wrapped
+        {val ? obj.a : <span>bar</span>} <span>hello</span>
+      </p>
+      <p>
+        // ❌ 'foo' needs to be wrapped in a span (expression has a sibling)
+        {val && 'foo'}
         <span>hello world</span>
       </p>
-      <p>{val || 'bar'}</p> // ✅ conditionally rendered text, but no siblings
+      // ✅ conditionally rendered text, but no siblings
+      <p>{val || 'bar'}</p>
+      // ✅ conditionally rendered text, but no siblings
+      <p>{val ? 'foo' : 'bar'}</p>
     </div>
   );
 }
@@ -70,14 +88,27 @@ The correct way to write this code, avoiding browser exceptions is to wrap each 
 function SomeComponent({ val }) {
   return (
     <div>
+      // ✅ all text nodes with siblings, where one is conditional, wrapped
       <p>
         {val ? <span>foo</span> : <span>bar</span>} <span>hello world</span>
       </p>
       <p>
+        // ✅ `val.toLocaleString()` returns a text node and should be wrapped
+        {val ? <span>{val.toLocaleString()}</span> : <span>bar</span>} <span>hello world</span>
+      </p>
+      <p>
+        // ✅ object properties rendering a text node sohuld be wrapped
+        {val ? <span>{obj.a}</span> : <span>bar</span>} <span>hello</span>
+      </p>
+      <p>
+        // ✅ 'foo' needs to be wrapped in a span (expression has a sibling)
         {val && <span>foo</span>}
         <span>hello world</span>
       </p>
-      <p>{val || 'bar'}</p> // ✅ still no need to wrap, due to no siblings
+      // ✅ conditionally rendered text, but no siblings
+      <p>{val || 'bar'}</p>
+      // ✅ conditionally rendered text, but no siblings
+      <p>{val ? 'foo' : 'bar'}</p>
     </div>
   );
 }

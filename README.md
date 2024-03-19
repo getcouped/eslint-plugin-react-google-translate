@@ -92,7 +92,7 @@ function SomeComponent({ val }) {
 }
 ```
 
-The correct way to write this code, avoiding browser exceptions is to wrap each of the conditionally rendered text nodes (with siblings) in an element (generally a `<span>`):
+The correct way to write this code, avoiding browser exceptions is to wrap each of the conditionally rendered text nodes (with siblings) in an element (generally a `<span>`). Static text nodes with conditionally rendered siblings must also be wrapped:
 
 ```jsx
 function SomeComponent({ val }) {

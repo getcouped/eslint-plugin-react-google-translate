@@ -36,6 +36,16 @@ Then configure the rule under the rules section.
 }
 ```
 
+The rule can also be treated as a warning if an error is deemed too strict.
+
+```json
+{
+  "rules": {
+    "react-google-translate/no-conditional-text-nodes-with-siblings": "warn"
+  }
+}
+```
+
 ## Rule
 
 When active on a page, the Google Translate browser extension is very liberal with its DOM manipulation, notably, replacing text nodes with `font` tags. This can be a problem for React applications as it can cause an exception to be thrown when _conditionally_ rendering text nodes with siblings within JSX expressions.

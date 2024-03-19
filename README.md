@@ -73,9 +73,9 @@ function SomeComponent({ val }) {
         {val && 'foo'}
         <span>hello world</span>
       </p>
-      // ✅ conditionally rendered text, but no siblings
+      // ✅ conditionally rendered text nodes, with no siblings, won't throw
       <p>{val || 'bar'}</p>
-      // ✅ conditionally rendered text, but no siblings
+      // ✅ conditionally rendered text nodes, with no siblings, won't throw
       <p>{val ? 'foo' : 'bar'}</p>
     </div>
   );

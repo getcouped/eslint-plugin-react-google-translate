@@ -1,56 +1,8 @@
 # eslint-plugin-react-google-translate
 
-ESLint plugin to highlight code patterns in React applications which can lead to browser exceptions while the Google Translate browser extension is in use.
-
-## Installation
-
-You'll first need to install [ESLint](https://eslint.org/):
-
-```sh
-npm i eslint --save-dev
-```
-
-Next, install `eslint-plugin-react-google-translate`:
-
-```sh
-npm install eslint-plugin-react-google-translate --save-dev
-```
-
-## Usage
-
-Add `react-google-translate` to the plugins section of your `.eslintrc` configuration file. You can omit the `eslint-plugin-` prefix:
-
-```json
-{
-  "plugins": ["react-google-translate"]
-}
-```
-
-Then configure the rule under the rules section.
-
-```json
-{
-  "rules": {
-    "react-google-translate/no-conditional-text-nodes-with-siblings": "error"
-  }
-}
-```
-
-The rule can also be treated as a warning if an error is deemed too strict.
-
-```json
-{
-  "rules": {
-    "react-google-translate/no-conditional-text-nodes-with-siblings": "warn"
-  }
-}
-```
-
-## Rule
+ESLint plugin to highlight code patterns in React applications which can lead to browser exceptions while the Google Translate browser extension is in use. This is a common problem for React applications and a known issue to both [React](https://github.com/facebook/react/issues/11538#issuecomment-390386520) and [Google](https://issues.chromium.org/issues/41407169).
 
 When active on a page, the Google Translate browser extension is very liberal with its DOM manipulation, notably, replacing text nodes with `font` tags. This can be a problem for React applications as it can cause an exception to be thrown when _conditionally_ rendering text nodes with siblings within JSX expressions.
-
-(n.b. This is a known issue to both [React](https://github.com/facebook/react/issues/11538#issuecomment-390386520) and [Google](https://issues.chromium.org/issues/41407169).)
 
 Whilst many proposals have been suggested to avoid browser issues, this ESLint plugin aims to solve the problem far earlier in the development process by highlighting certain code patterns to the developer which can cause a browser exception to be thrown where Google Translate is in use.
 
@@ -122,5 +74,49 @@ function SomeComponent({ val }) {
       <p>{val ? 'foo' : 'bar'}</p>
     </div>
   );
+}
+```
+
+## Installation
+
+You'll first need to install [ESLint](https://eslint.org/):
+
+```sh
+npm i eslint --save-dev
+```
+
+Next, install `eslint-plugin-react-google-translate`:
+
+```sh
+npm install eslint-plugin-react-google-translate --save-dev
+```
+
+## Usage
+
+Add `react-google-translate` to the plugins section of your `.eslintrc` configuration file. You can omit the `eslint-plugin-` prefix:
+
+```json
+{
+  "plugins": ["react-google-translate"]
+}
+```
+
+Then configure the rule under the rules section.
+
+```json
+{
+  "rules": {
+    "react-google-translate/no-conditional-text-nodes-with-siblings": "error"
+  }
+}
+```
+
+The rule can also be treated as a warning if an error is deemed too strict.
+
+```json
+{
+  "rules": {
+    "react-google-translate/no-conditional-text-nodes-with-siblings": "warn"
+  }
 }
 ```

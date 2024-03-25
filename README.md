@@ -6,7 +6,7 @@ When active on a page, the Google Translate browser extension is very liberal wi
 
 Whilst many proposals have been suggested to avoid browser issues, this ESLint plugin aims to solve the problem far earlier in the development process by highlighting certain code patterns to the developer which can cause a browser exception to be thrown where Google Translate is in use.
 
-Examples of code that will throw:
+Examples of code that can throw:
 
 ```jsx
 function SomeComponent({ val }) {
@@ -44,7 +44,7 @@ function SomeComponent({ val }) {
 }
 ```
 
-The correct way to write this code, avoiding browser exceptions is to wrap each of the conditionally rendered text nodes (with siblings) in an element (generally a `<span>`). Static text nodes with conditionally rendered siblings must also be wrapped:
+The safe way to write this code, avoiding browser exceptions, is to wrap each of the conditionally rendered text nodes (with siblings) in an element (for example, a `<span>`). Static text nodes with conditionally rendered siblings must also be wrapped:
 
 ```jsx
 function SomeComponent({ val }) {

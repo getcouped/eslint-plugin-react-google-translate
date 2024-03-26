@@ -12,16 +12,17 @@ Examples of code that can throw:
 function SomeComponent({ val }) {
   return (
     <div>
-      // ❌ all text must be wrapped in spans ('foo', 'bar' & 'hello world')
-      <p>{val ? 'foo' : 'bar'} hello world</p>
       <p>
         // ❌ foo & bar must be wrapped
         {val ? 'foo' : 'bar'} <span>hello world</span>
       </p>
       <p>
-        // ❌ 'hello world' must be wrapped
+        // ❌ static text nodes must be wrapped when they are preceeded by a
+        conditional expression
         {val ? <span>foo</span> : <span>bar</span>} hello world
       </p>
+      // ❌ all text must be wrapped in spans ('foo', 'bar' & 'hello world')
+      <p>{val ? 'foo' : 'bar'} hello world</p>
       <p>
         // ❌ `val.toLocaleString()` returns a text node and should be wrapped
         {val ? val.toLocaleString() : <span>bar</span>} <span>hello world</span>
@@ -39,6 +40,8 @@ function SomeComponent({ val }) {
       <p>{val || 'bar'}</p>
       // ✅ conditionally rendered text nodes with no siblings won't throw
       <p>{val ? 'foo' : 'bar'}</p>
+      // ✅ conditional expression follows the static text node and won't throw
+      <p>hello world {val ? <span>foo</span> : <span>bar</span>}</p>
     </div>
   );
 }

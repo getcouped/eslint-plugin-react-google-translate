@@ -124,22 +124,24 @@ Add `react-google-translate` to the plugins section of your `.eslintrc` configur
 }
 ```
 
-Then configure the rule under the rules section.
+Then configure the rules under the rules section. They have been separated to allow the user to chose which rules to adopt.
 
 ```json
 {
   "rules": {
-    "react-google-translate/no-conditional-text-nodes-with-siblings": "error"
+    "react-google-translate/no-conditional-text-nodes-with-siblings": "error",
+    "react-google-translate/no-return-text-nodes": "error"
   }
 }
 ```
 
-The rule can also be treated as a warning if an error is deemed too strict.
+Each rule can also be treated as a warning if an error is deemed too strict.
 
 ```json
 {
   "rules": {
-    "react-google-translate/no-conditional-text-nodes-with-siblings": "warn"
+    "react-google-translate/no-conditional-text-nodes-with-siblings": "error",
+    "react-google-translate/no-return-text-nodes": "warn"
   }
 }
 ```

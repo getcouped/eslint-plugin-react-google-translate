@@ -80,6 +80,26 @@ function SomeComponent({ val }) {
 }
 ```
 
+An additional problem identified is React components returning text nodes directly (or numerical values which will be rendered as text). When a React component returns values other than JSX / null, Google Translate can continue to display stale values after state changes, without any error being thrown. Since this is very hard to debug it is better to avoid it altogether.
+
+```tsx
+export function SomeComponent({ input }) {
+  if (!input) {
+    return null; // ✅ not a problem
+  }
+
+  if (input === 'a') {
+    return 'A'; // ❌ the browser can display the stale value when state changes
+  } else if (input === 'b') {
+    return 2; // ❌ numerical values which are rendered as strings can also experience this
+  } else if (input === 'c') {
+    return `Template Litera${1}`; // ❌ template literals are displayed as strings and can also experience this
+  } else {
+    return <span>I am fine</span>; // ✅ returning JSX prevents the problem
+  }
+}
+```
+
 ## Installation
 
 You'll first need to install [ESLint](https://eslint.org/):

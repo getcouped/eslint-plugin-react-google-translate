@@ -17,7 +17,7 @@ function SomeComponent({ val }) {
         {val ? 'foo' : 'bar'} <span>hello world</span>
       </p>
       <p>
-        // ❌ static text nodes must be wrapped when they are preceeded by a
+        // ❌ static text nodes must be wrapped when they are preceded by a
         conditional expression
         {val ? <span>foo</span> : <span>bar</span>} hello world
       </p>
@@ -47,7 +47,7 @@ function SomeComponent({ val }) {
 }
 ```
 
-The safe way to write this code, avoiding browser exceptions, is to wrap each of the conditionally rendered text nodes (with siblings) in an element (for example, a `<span>`). Static text nodes with preceeding conditionally rendered siblings must also be wrapped:
+The safe way to write this code, avoiding browser exceptions, is to wrap each of the conditionally rendered text nodes (with siblings) in an element (for example, a `<span>`). Static text nodes with preceding conditionally rendered siblings must also be wrapped:
 
 ```jsx
 function SomeComponent({ val }) {
@@ -179,3 +179,5 @@ Each rule can also be treated as a warning if an error is deemed too strict.
   {showVal ? val?.toLocaleString() : <span>bar</span>} <span>hello world</span>
 </p>
 ```
+
+- When rendering the `children` prop, if it is preceded by a conditionally rendered text node, it will not be reported, even if its value is a string.

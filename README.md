@@ -145,16 +145,3 @@ Each rule can also be treated as a warning if an error is deemed too strict.
   }
 }
 ```
-
-## Limitations
-
-- Optional chaining is not supported.
-
-```jsx
-<p>
-  // ❌ `val?.a` uses optional chaining and will not be reported
-  {showVal ? val?.a : <span>bar</span>} <span>hello world</span>
-  // ❌ `toLocaleString` being optionally chained will also fail to report
-  {showVal ? val?.toLocaleString() : <span>bar</span>} <span>hello world</span>
-</p>
-```

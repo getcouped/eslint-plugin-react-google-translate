@@ -145,3 +145,9 @@ Each rule can also be treated as a warning if an error is deemed too strict.
   }
 }
 ```
+
+## TypeScript
+
+The plugin supports TypeScript and will use type information where available. Type-aware checks run _in addition_ to the standard pattern-based checks.
+
+Where type information is unavailable (e.g. in JavaScript files or in Node versions earlier than 18.18), the plugin falls back to pattern matching only. This reduces coverage slightly, but the plugin will still catch most problematic patterns without types.

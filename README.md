@@ -102,46 +102,52 @@ export function SomeComponent({ input }) {
 
 ## Installation
 
-You'll first need to install [ESLint](https://eslint.org/):
-
-```sh
-npm i eslint --save-dev
-```
-
-Next, install `eslint-plugin-react-google-translate`:
-
 ```sh
 npm install eslint-plugin-react-google-translate --save-dev
 ```
 
-## Usage
+## Usage (ESLint 9+, flat config)
 
-Add `react-google-translate` to the plugins section of your `.eslintrc` configuration file. You can omit the `eslint-plugin-` prefix:
+Use the `recommended` config to enable all rules:
 
-```json
-{
-  "plugins": ["react-google-translate"]
-}
+```js
+// eslint.config.js
+import reactGoogleTranslate from 'eslint-plugin-react-google-translate';
+
+export default [
+  reactGoogleTranslate.configs.recommended,
+];
 ```
 
-Then configure the rules under the rules section. They have been separated to allow the user to chose which rules to adopt.
+Or configure the rules individually:
+
+```js
+// eslint.config.js
+import reactGoogleTranslate from 'eslint-plugin-react-google-translate';
+
+export default [
+  {
+    plugins: {
+      'react-google-translate': reactGoogleTranslate,
+    },
+    rules: {
+      'react-google-translate/no-conditional-text-nodes-with-siblings': 'error',
+      'react-google-translate/no-return-text-nodes': 'error',
+    },
+  },
+];
+```
+
+## Usage (ESLint 7 & 8, legacy `.eslintrc`)
+
+The plugin still works with older ESLint versions using the legacy config format. Add `react-google-translate` to the plugins section of your `.eslintrc` configuration file:
 
 ```json
 {
+  "plugins": ["react-google-translate"],
   "rules": {
     "react-google-translate/no-conditional-text-nodes-with-siblings": "error",
     "react-google-translate/no-return-text-nodes": "error"
-  }
-}
-```
-
-Each rule can also be treated as a warning if an error is deemed too strict.
-
-```json
-{
-  "rules": {
-    "react-google-translate/no-conditional-text-nodes-with-siblings": "error",
-    "react-google-translate/no-return-text-nodes": "warn"
   }
 }
 ```

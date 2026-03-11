@@ -12,6 +12,7 @@
   "author": "alistair-coup",
   "main": "./lib/index.js",
   "exports": "./lib/index.js",
+  "types": "./lib/index.d.ts",
   "scripts": {
     "lint": "eslint ."
   },

@@ -10,6 +10,7 @@ module.exports = {
   env: {
     node: true,
   },
+  ignorePatterns: ['**/*.d.ts'],
   rules: {
     'n/no-missing-require': [
       'error',

@@ -114,12 +114,10 @@ Use the `recommended` config to enable all rules:
 // eslint.config.js
 import reactGoogleTranslate from 'eslint-plugin-react-google-translate';
 
-export default [
-  reactGoogleTranslate.configs.recommended,
-];
+export default [reactGoogleTranslate.configs.recommended];
 ```
 
-Or configure the rules individually:
+Or configure the rules individually (Each rule can be treated as a warning if an error is deemed too strict.):
 
 ```js
 // eslint.config.js
@@ -132,7 +130,7 @@ export default [
     },
     rules: {
       'react-google-translate/no-conditional-text-nodes-with-siblings': 'error',
-      'react-google-translate/no-return-text-nodes': 'error',
+      'react-google-translate/no-return-text-nodes': 'warn',
     },
   },
 ];

@@ -1,6 +1,6 @@
 {
   "name": "eslint-plugin-react-google-translate",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "ESLint plugin to highlight code patterns in React applications which can lead to browser exceptions while the Google Translate browser extension is in use.",
   "keywords": [
     "eslint",
@@ -28,7 +28,7 @@
     "node": "^18.18.0 || ^20.9.0 || >=21.1.0"
   },
   "peerDependencies": {
-    "eslint": ">=7"
+    "eslint": ">=8"
   },
   "files": [
     "lib"

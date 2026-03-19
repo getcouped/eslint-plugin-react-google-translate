@@ -136,7 +136,7 @@ export default [
 ];
 ```
 
-## Usage (ESLint 7 & 8, legacy `.eslintrc`)
+## Usage (ESLint 8, legacy `.eslintrc`)
 
 The plugin still works with older ESLint versions using the legacy config format. Add `react-google-translate` to the plugins section of your `.eslintrc` configuration file:
 

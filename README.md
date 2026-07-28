@@ -155,3 +155,32 @@ The plugin still works with older ESLint versions using the legacy config format
 The plugin supports TypeScript and will use type information where available. Type-aware checks run _in addition_ to the standard pattern-based checks.
 
 Where type information is unavailable (e.g. in JavaScript files or in Node versions earlier than 18.18), the plugin falls back to pattern matching only. This reduces coverage slightly, but the plugin will still catch most problematic patterns without types.
+
+## What makes a text node dangerous
+
+A bare text node only matters if React creates a `HostText` fiber for it _and_ then removes it or uses it as an `insertBefore` reference. That splits into two hazards, which the rule checks separately (verified against react-dom 18.3.1 by mounting each shape, wrapping every text node in a `<font>` the way Translate does, then flipping state):
+
+| Hazard | Condition | Example |
+| --- | --- | --- |
+| `removeChild` | a bare text node exists in one state and not in another | `{c ? 'a' : ''}` throws |
+| `insertBefore` | a bare text node exists and a **preceding** sibling mounts | `{c && <i/>}{'text'}` throws |
+
+Three consequences, which are why some plausible-looking code is deliberately _not_ reported:
+
+- **`''` renders nothing.** The reconciler's guard is `typeof newChild === 'string' && newChild !== ''`, so an empty string never creates a `HostText` fiber and can never be the node that throws. When a conditional has an `''` branch, the hazard — if any — is the _other_ branch, and that is where the rule reports.
+- **`{c ? 'a' : 'b'}` cannot throw via `removeChild`.** Both branches are a single bare text node, so React reuses one `HostText` fiber and only assigns `nodeValue`. It is still reported when a conditional _precedes_ it, because that is the `insertBefore` hazard.
+- **`getHostSibling` searches forward only,** so the `insertBefore` hazard is asymmetric: a conditional _before_ the text is dangerous, one _after_ it is not.
+
+## Known limitations
+
+The rule fires only on conditionals, so a green lint does not mean "safe". This is a genuine `insertBefore` hazard that neither rule can see:
+
+```jsx
+{item?.icon}
+{item?.label}          {/* bare text node; throws when icon mounts */}
+{isLoading && <Spinner />}
+```
+
+Neither expression is a `ConditionalExpression` or a `LogicalExpression`, so neither is examined. Catching it means checking every child that can contribute text against every preceding sibling that can mount, which needs type information to stay precise.
+
+Without types, `{cond ? label : ''}` is also undecidable: `label` could hold a string or a `ReactNode`. The rule reports member and optional-chain expressions in that position (its long-standing behaviour) but not bare identifiers, which would flag every node-typed value.

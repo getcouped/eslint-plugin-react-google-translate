@@ -19,4 +19,17 @@ module.exports = {
       },
     ],
   },
+  overrides: [
+    {
+      files: ['tests/**/*.js'],
+      rules: {
+        // `node:test` works on every Node version in the `engines` range; it is
+        // only flagged as experimental below Node 20
+        'n/no-unsupported-features/node-builtins': [
+          'error',
+          { ignores: ['test'] },
+        ],
+      },
+    },
+  ],
 };

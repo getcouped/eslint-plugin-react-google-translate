@@ -8,6 +8,7 @@ declare const plugin: ESLint.Plugin & {
   rules: {
     'no-conditional-text-nodes-with-siblings': Rule.RuleModule;
     'no-return-text-nodes': Rule.RuleModule;
+    'no-unkeyed-text-element-swap': Rule.RuleModule;
   };
   configs: {
     recommended: Linter.Config;

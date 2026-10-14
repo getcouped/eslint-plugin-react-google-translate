@@ -100,6 +100,55 @@ export function SomeComponent({ input }) {
 }
 ```
 
+## Swapped elements with differently laid out text children (`no-unkeyed-text-element-swap`)
+
+A third pattern crashes without any conditional text node: a parent rendering _one of several elements of the same type_ whose children are not laid out the same way (text nodes, `<br />`, inline elements in a different order or number), without distinct `key`s.
+
+```jsx
+const VALUES = [
+  { body: <p>First sentence.<br />Second sentence.</p> },
+  { body: <p>A community of 11{NBSP}000 pharmacies.<br />Second sentence.</p> },
+];
+
+// ❌ both bodies are a <p> at the same position
+<div>{VALUES[index].body}</div>
+
+// ❌ same thing, inline
+<div>{product ? <p>Linked to <a href="/p">{product.id}</a></p> : <p>No product</p>}</div>
+```
+
+React keeps the same `<p>` and reconciles its children **by index**. Switching turns a `<br />` into a text node (or the reverse) and inserts the new node in front of a text node Google Translate has already replaced, which throws `NotFoundError: Failed to execute 'insertBefore' on 'Node'`.
+
+Give each alternative a distinct `key`: React then unmounts one element and mounts the other, and only ever inserts elements, which Google Translate does not move.
+
+```jsx
+// ✅ distinct keys
+const VALUES = [
+  {
+    body: (
+      <p key="mission">
+        First sentence.
+        <br />
+        Second sentence.
+      </p>
+    ),
+  },
+  {
+    body: (
+      <p key="community">
+        A community of 11{NBSP}000 pharmacies.
+        <br />
+        Second sentence.
+      </p>
+    ),
+  },
+];
+
+<div>{product ? <p key="linked">…</p> : <p key="none">No product</p>}</div>;
+```
+
+The rule resolves alternatives written inline, held by a top-level `const` of the same file, or read from a top-level `const` array of elements or of objects (`ITEMS[i]`, `ITEMS[i].body`). Alternatives coming from props or other modules are out of reach. An expression child of unknown kind (`{value}`) matches any kind when two layouts are compared, to avoid false positives. It accepts the same `textComponents` option as `no-conditional-text-nodes-with-siblings`.
+
 ## Installation
 
 ```sh

@@ -155,3 +155,54 @@ The plugin still works with older ESLint versions using the legacy config format
 The plugin supports TypeScript and will use type information where available. Type-aware checks run _in addition_ to the standard pattern-based checks.
 
 Where type information is unavailable (e.g. in JavaScript files or in Node versions earlier than 18.18), the plugin falls back to pattern matching only. This reduces coverage slightly, but the plugin will still catch most problematic patterns without types.
+
+## Options
+
+### `no-conditional-text-nodes-with-siblings`: `textComponents`
+
+Some components render a bare text node rather than an element: react-intl's `<FormattedMessage />` (its default `textComponent` is `React.Fragment`), `<FormattedNumber />`, `<FormattedDate />`, `<FormattedTime />` and `<FormattedPlural />`, for instance. To Google Translate their output is a text node like any other, but the rule sees a JSX element and stays silent on both of its patterns:
+
+```jsx
+// ❌ a conditionally rendered text node with siblings
+{
+  compact && <FormattedMessage id="productsFound" />;
+}
+<span>My order</span>;
+
+// ❌ a text node that follows a conditional sibling
+{
+  val && <b>x</b>;
+}
+<FormattedMessage id="hello" />;
+```
+
+List them in `textComponents` and they are checked exactly like text nodes (member expressions such as `Intl.FormattedNumber` are supported):
+
+```js
+rules: {
+  'react-google-translate/no-conditional-text-nodes-with-siblings': [
+    'error',
+    {
+      textComponents: [
+        'FormattedMessage',
+        'FormattedNumber',
+        'FormattedDate',
+        'FormattedTime',
+        'FormattedPlural',
+      ],
+    },
+  ],
+}
+```
+
+The fix is the same as for any text node: `<span><FormattedMessage … /></span>`.
+
+## Development
+
+```sh
+npm install
+npm run lint
+npm test
+```
+
+Tests are ESLint `RuleTester` cases under `tests/`, run by `tests/run.js`. The type-aware cases build a TypeScript program from `tests/fixtures/tsconfig.json`.

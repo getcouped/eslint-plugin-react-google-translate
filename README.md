@@ -149,6 +149,55 @@ const VALUES = [
 
 The rule resolves alternatives written inline, held by a top-level `const` of the same file, or read from a top-level `const` array of elements or of objects (`ITEMS[i]`, `ITEMS[i].body`). Alternatives coming from props or other modules are out of reach. An expression child of unknown kind (`{value}`) matches any kind when two layouts are compared, to avoid false positives. It accepts the same `textComponents` option as `no-conditional-text-nodes-with-siblings`.
 
+## A component, a list or `children` before a text node (`no-dynamic-sibling-before-text`)
+
+The crash needs a text node Google Translate has replaced, and a sibling React mounts _in front of it_ afterwards. `no-conditional-text-nodes-with-siblings` recognises that sibling when it is an inline conditional. It is just as dangerous when nothing is conditional in the JSX:
+
+```jsx
+function Alert({ message }) {
+  if (!message) return null; // renders nothing until it has a message
+  return <strong>{message}</strong>;
+}
+
+// ❌ when the alert mounts, React inserts it in front of the text node
+<p>
+  <Alert message={message} />
+  You can contact us at any time.
+</p>
+
+// ❌ same with a list, or with children
+<p>{items.map((item) => <Tag key={item} />)} suffix</p>
+<p>{children} text</p>
+```
+
+The fix is the usual one: wrap the text in an element.
+
+```jsx
+// ✅
+<p>
+  <Alert message={message} />
+  <span>You can contact us at any time.</span>
+</p>
+```
+
+Host elements (`<b>`, `<span>`) never mount late and are not reported. Components known to always render an element (design-system primitives) are declared in `allowedComponents`; an entry written `/…/` is a regular expression:
+
+```js
+rules: {
+  'react-google-translate/no-dynamic-sibling-before-text': [
+    'error',
+    {
+      allowedComponents: ['Text', 'Heading', 'Icon', '/(Outlined|Filled|TwoTone)$/'],
+      textComponents: ['FormattedMessage'],
+    },
+  ],
+}
+```
+
+With type information, an expression that follows a conditional sibling is also reported when its type says it renders text (`{cond && <b />}{label}` with `label: string`). Known limit: a nullable text value before a text (`{price} €`) mounts a text node when it first gets a value; detecting it needs flow analysis.
+
+This rule is not part of the `recommended` config: it needs `allowedComponents` tuned to your component library to stay quiet on components that always render an element.
+
 ## Installation
 
 ```sh
@@ -157,7 +206,7 @@ npm install eslint-plugin-react-google-translate --save-dev
 
 ## Usage (ESLint 9+, flat config)
 
-Use the `recommended` config to enable all rules:
+Use the `recommended` config to enable the rules that need no configuration (`no-dynamic-sibling-before-text` is opted into separately, see below):
 
 ```js
 // eslint.config.js

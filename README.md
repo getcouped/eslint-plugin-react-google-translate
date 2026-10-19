@@ -100,6 +100,104 @@ export function SomeComponent({ input }) {
 }
 ```
 
+## Swapped elements with differently laid out text children (`no-unkeyed-text-element-swap`)
+
+A third pattern crashes without any conditional text node: a parent rendering _one of several elements of the same type_ whose children are not laid out the same way (text nodes, `<br />`, inline elements in a different order or number), without distinct `key`s.
+
+```jsx
+const VALUES = [
+  { body: <p>First sentence.<br />Second sentence.</p> },
+  { body: <p>A community of 11{NBSP}000 pharmacies.<br />Second sentence.</p> },
+];
+
+// ❌ both bodies are a <p> at the same position
+<div>{VALUES[index].body}</div>
+
+// ❌ same thing, inline
+<div>{product ? <p>Linked to <a href="/p">{product.id}</a></p> : <p>No product</p>}</div>
+```
+
+React keeps the same `<p>` and reconciles its children **by index**. Switching turns a `<br />` into a text node (or the reverse) and inserts the new node in front of a text node Google Translate has already replaced, which throws `NotFoundError: Failed to execute 'insertBefore' on 'Node'`.
+
+Give each alternative a distinct `key`: React then unmounts one element and mounts the other, and only ever inserts elements, which Google Translate does not move.
+
+```jsx
+// ✅ distinct keys
+const VALUES = [
+  {
+    body: (
+      <p key="mission">
+        First sentence.
+        <br />
+        Second sentence.
+      </p>
+    ),
+  },
+  {
+    body: (
+      <p key="community">
+        A community of 11{NBSP}000 pharmacies.
+        <br />
+        Second sentence.
+      </p>
+    ),
+  },
+];
+
+<div>{product ? <p key="linked">…</p> : <p key="none">No product</p>}</div>;
+```
+
+The rule resolves alternatives written inline, held by a top-level `const` of the same file, or read from a top-level `const` array of elements or of objects (`ITEMS[i]`, `ITEMS[i].body`). Alternatives coming from props or other modules are out of reach. An expression child of unknown kind (`{value}`) matches any kind when two layouts are compared, to avoid false positives. It accepts the same `textComponents` option as `no-conditional-text-nodes-with-siblings`.
+
+## A component, a list or `children` before a text node (`no-dynamic-sibling-before-text`)
+
+The crash needs a text node Google Translate has replaced, and a sibling React mounts _in front of it_ afterwards. `no-conditional-text-nodes-with-siblings` recognises that sibling when it is an inline conditional. It is just as dangerous when nothing is conditional in the JSX:
+
+```jsx
+function Alert({ message }) {
+  if (!message) return null; // renders nothing until it has a message
+  return <strong>{message}</strong>;
+}
+
+// ❌ when the alert mounts, React inserts it in front of the text node
+<p>
+  <Alert message={message} />
+  You can contact us at any time.
+</p>
+
+// ❌ same with a list, or with children
+<p>{items.map((item) => <Tag key={item} />)} suffix</p>
+<p>{children} text</p>
+```
+
+The fix is the usual one: wrap the text in an element.
+
+```jsx
+// ✅
+<p>
+  <Alert message={message} />
+  <span>You can contact us at any time.</span>
+</p>
+```
+
+Host elements (`<b>`, `<span>`) never mount late and are not reported. Components known to always render an element (design-system primitives) are declared in `allowedComponents`; an entry written `/…/` is a regular expression:
+
+```js
+rules: {
+  'react-google-translate/no-dynamic-sibling-before-text': [
+    'error',
+    {
+      allowedComponents: ['Text', 'Heading', 'Icon', '/(Outlined|Filled|TwoTone)$/'],
+      textComponents: ['FormattedMessage'],
+    },
+  ],
+}
+```
+
+With type information, an expression that follows a conditional sibling is also reported when its type says it renders text (`{cond && <b />}{label}` with `label: string`). Known limit: a nullable text value before a text (`{price} €`) mounts a text node when it first gets a value; detecting it needs flow analysis.
+
+This rule is not part of the `recommended` config: it needs `allowedComponents` tuned to your component library to stay quiet on components that always render an element.
+
 ## Installation
 
 ```sh
@@ -108,7 +206,7 @@ npm install eslint-plugin-react-google-translate --save-dev
 
 ## Usage (ESLint 9+, flat config)
 
-Use the `recommended` config to enable all rules:
+Use the `recommended` config to enable the rules that need no configuration (`no-dynamic-sibling-before-text` is opted into separately, see below):
 
 ```js
 // eslint.config.js
@@ -155,3 +253,54 @@ The plugin still works with older ESLint versions using the legacy config format
 The plugin supports TypeScript and will use type information where available. Type-aware checks run _in addition_ to the standard pattern-based checks.
 
 Where type information is unavailable (e.g. in JavaScript files or in Node versions earlier than 18.18), the plugin falls back to pattern matching only. This reduces coverage slightly, but the plugin will still catch most problematic patterns without types.
+
+## Options
+
+### `no-conditional-text-nodes-with-siblings`: `textComponents`
+
+Some components render a bare text node rather than an element: react-intl's `<FormattedMessage />` (its default `textComponent` is `React.Fragment`), `<FormattedNumber />`, `<FormattedDate />`, `<FormattedTime />` and `<FormattedPlural />`, for instance. To Google Translate their output is a text node like any other, but the rule sees a JSX element and stays silent on both of its patterns:
+
+```jsx
+// ❌ a conditionally rendered text node with siblings
+{
+  compact && <FormattedMessage id="productsFound" />;
+}
+<span>My order</span>;
+
+// ❌ a text node that follows a conditional sibling
+{
+  val && <b>x</b>;
+}
+<FormattedMessage id="hello" />;
+```
+
+List them in `textComponents` and they are checked exactly like text nodes (member expressions such as `Intl.FormattedNumber` are supported):
+
+```js
+rules: {
+  'react-google-translate/no-conditional-text-nodes-with-siblings': [
+    'error',
+    {
+      textComponents: [
+        'FormattedMessage',
+        'FormattedNumber',
+        'FormattedDate',
+        'FormattedTime',
+        'FormattedPlural',
+      ],
+    },
+  ],
+}
+```
+
+The fix is the same as for any text node: `<span><FormattedMessage … /></span>`.
+
+## Development
+
+```sh
+npm install
+npm run lint
+npm test
+```
+
+Tests are ESLint `RuleTester` cases under `tests/`, run by `tests/run.js`. The type-aware cases build a TypeScript program from `tests/fixtures/tsconfig.json`.
